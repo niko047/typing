@@ -43,6 +43,8 @@ export function useAutoCompletion({
       ghostSpan.style.opacity = "0.5";
       ghostSpan.style.color = "var(--muted-foreground)";
       ghostSpan.style.backgroundColor = "transparent";
+      ghostSpan.style.fontFamily = "var(--font-eb-garamond), serif";
+      ghostSpan.style.fontStyle = "italic";
       ghostSpan.textContent = text;
       ghostSpan.contentEditable = "false";
       ghostSpan.setAttribute("data-ghost-text", "true");

@@ -56,9 +56,11 @@ export default function Home() {
               onKeyDown={handleKeyDown}
               suppressContentEditableWarning
               style={{
-                fontSize: "16px",
-                lineHeight: "1.8",
-                fontFamily: "var(--font-sans)",
+                fontSize: "inherit",
+                lineHeight: "inherit",
+                fontFamily: "inherit",
+                fontWeight: "400",
+                letterSpacing: "0.25px",
               }}
             ></div>
 
