@@ -55,9 +55,45 @@ Once the application is running, you can:
 - Use AI assistance to enhance your writing
 - Save and manage your documents
 
+## TODO List
+
+### 🎨 UI/UX Improvements
+- [ ] **Redesign instruction UI** - Improve editing toolbar and choose sleek fonts
+- [ ] **Improve error display** - Find a better way to show AI completion errors (currently red text)
+- [ ] **Enhance loading indicator** - Replace bottom-right "AI is thinking..." with something more elegant
+- [ ] **Multiple documents** - Allow creation of multiple documents
+- [ ] **Add document title input** - Allow users to name their documents
+- [ ] **Dark/light theme toggle** - User preference for color schemes
+
+### 🚀 Core Features
+- [ ] **Document persistence** - Save documents locally or to cloud
+- [ ] **Document management** - Create, open, save, delete documents
+- [ ] **Export functionality** - Export to PDF, Word, Markdown
+- [ ] **Auto-save** - Automatically save work as user types
+- [ ] **Undo/Redo system** - Better text editing history
+- [ ] **Find and replace** - Search within documents
+
+### 🤖 AI Enhancements
+- [ ] **Completion settings** - Adjust AI creativity, length, style
+- [ ] **Context-aware suggestions** - Better understanding of document type
+
+### ⚡ Performance & Technical
+- [ ] **Keyboard shortcuts** - Comprehensive shortcut system
+- [ ] **Mobile responsive design** - Better mobile writing experience
+- [ ] **Performance optimization** - Faster loading and smoother experience, stream suggestions
+
+### 📱 Additional Features
+- [ ] **Distraction-free mode** - Hide all UI elements except text
+- [ ] **Reading time estimation** - Show estimated reading time 
+- [ ] **Implement word/character count display** - Show writing statistics in a clean way
+- [ ] **Version history** - Track document changes over time
+
+
+---
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Feel free to pick any item from the TODO list above or submit your own improvements.
 
 ## License
 
