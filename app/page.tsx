@@ -30,7 +30,7 @@ export default function Home() {
   const handleTextChange = (e: React.FormEvent<HTMLDivElement>) => {
     const text = e.currentTarget.textContent || "";
     setContent(text);
-    handleInput();
+    handleInput(e);
   };
 
   return (

@@ -17,110 +17,112 @@ export function useAutoCompletion({
   const ghostTextRef = useRef<HTMLSpanElement | null>(null);
   const isInsertingGhostTextRef = useRef(false);
 
-  const { completion, complete, isLoading, stop, error } = useCompletion({
-    api: "/api/completion",
-    onFinish: (prompt, completion) => {
-      if (completion) {
-        setShowGhostText(true);
-        insertGhostText(completion);
-      }
-    },
-    onError: (error) => {
-      console.error("AI completion error:", error);
-    },
-  });
+  const { completion, complete, isLoading, stop, error, setCompletion } =
+    useCompletion({
+      api: "/api/completion",
+      onError: (error) => {
+        console.error("AI completion error:", error);
+      },
+    });
 
-  const insertGhostText = useCallback(
-    (text: string) => {
-      if (!editorRef.current) return;
+  // Update ghost text progressively as completion streams
+  useEffect(() => {
+    if (completion && ghostTextRef.current) {
+      ghostTextRef.current.textContent = completion;
+    }
+  }, [completion]);
 
-      // Set flag to ignore input events during insertion
-      isInsertingGhostTextRef.current = true;
+  // Handle completion finish - ensure ghost text stays visible
+  useEffect(() => {
+    if (!isLoading && completion && ghostTextRef.current && showGhostText) {
+      // Completion finished, make sure the ghost text is still visible and properly set
+      ghostTextRef.current.textContent = completion;
+    }
+  }, [isLoading, completion, showGhostText]);
 
-      // Create ghost text span
-      const ghostSpan = document.createElement("span");
-      ghostSpan.className = "ghost-text";
-      ghostSpan.style.opacity = "0.5";
-      ghostSpan.style.color = "var(--muted-foreground)";
-      ghostSpan.style.backgroundColor = "transparent";
-      ghostSpan.style.fontFamily = "var(--font-eb-garamond), serif";
-      ghostSpan.style.fontStyle = "italic";
-      ghostSpan.textContent = text;
-      ghostSpan.contentEditable = "false";
-      ghostSpan.setAttribute("data-ghost-text", "true");
-      ghostTextRef.current = ghostSpan;
+  const createGhostTextPlaceholder = useCallback(() => {
+    if (!editorRef.current) return;
 
-      // Get current selection and ensure we have a proper text insertion point
-      const selection = window.getSelection();
+    // Set flag to ignore input events during insertion
+    isInsertingGhostTextRef.current = true;
 
-      try {
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
+    // Create ghost text span with empty content initially
+    const ghostSpan = document.createElement("span");
+    ghostSpan.className = "ghost-text";
+    ghostSpan.textContent = ""; // Start empty for streaming
+    ghostSpan.contentEditable = "false";
+    ghostSpan.setAttribute("data-ghost-text", "true");
+    ghostTextRef.current = ghostSpan;
 
-          // If we're at the editor div level, we need to find or create a text node
-          if (range.startContainer === editorRef.current) {
-            // If editor has text content, append to the end
-            if (
-              editorRef.current.textContent &&
-              editorRef.current.textContent.length > 0
-            ) {
-              // Find the last text node
-              const walker = document.createTreeWalker(
-                editorRef.current,
-                NodeFilter.SHOW_TEXT,
-                null
+    // Get current selection and ensure we have a proper text insertion point
+    const selection = window.getSelection();
+
+    try {
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+
+        // If we're at the editor div level, we need to find or create a text node
+        if (range.startContainer === editorRef.current) {
+          // If editor has text content, append to the end
+          if (
+            editorRef.current.textContent &&
+            editorRef.current.textContent.length > 0
+          ) {
+            // Find the last text node
+            const walker = document.createTreeWalker(
+              editorRef.current,
+              NodeFilter.SHOW_TEXT,
+              null
+            );
+            let lastTextNode = null;
+            let node;
+            while ((node = walker.nextNode())) {
+              lastTextNode = node;
+            }
+
+            if (lastTextNode) {
+              range.setStart(
+                lastTextNode,
+                lastTextNode.textContent?.length || 0
               );
-              let lastTextNode = null;
-              let node;
-              while ((node = walker.nextNode())) {
-                lastTextNode = node;
-              }
-
-              if (lastTextNode) {
-                range.setStart(
-                  lastTextNode,
-                  lastTextNode.textContent?.length || 0
-                );
-                range.collapse(true);
-              }
+              range.collapse(true);
             }
           }
-
-          // Insert the ghost text
-          range.insertNode(ghostSpan);
-
-          // Move cursor after ghost text
-          const newRange = document.createRange();
-          newRange.setStartAfter(ghostSpan);
-          newRange.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-        } else {
-          editorRef.current.appendChild(ghostSpan);
-
-          // Set cursor after the ghost text
-          const range = document.createRange();
-          const selection = window.getSelection();
-          range.setStartAfter(ghostSpan);
-          range.collapse(true);
-          selection?.removeAllRanges();
-          selection?.addRange(range);
         }
-      } catch (error) {
-        console.error("Failed to insert ghost text:", error);
-      }
 
-      // Reset flag after a brief delay to allow DOM to settle
-      setTimeout(() => {
-        isInsertingGhostTextRef.current = false;
-      }, 100);
-    },
-    [editorRef]
-  );
+        // Insert the ghost text placeholder
+        range.insertNode(ghostSpan);
+
+        // Keep cursor positioned BEFORE the ghost text to maintain normal caret size
+        const newRange = document.createRange();
+        newRange.setStartBefore(ghostSpan);
+        newRange.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      } else {
+        editorRef.current.appendChild(ghostSpan);
+
+        // Set cursor after the ghost text
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.setStartAfter(ghostSpan);
+        range.collapse(true);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+    } catch (error) {
+      console.error("Failed to insert ghost text placeholder:", error);
+    }
+
+    // Reset flag after a brief delay to allow DOM to settle
+    setTimeout(() => {
+      isInsertingGhostTextRef.current = false;
+    }, 100);
+  }, [editorRef]);
 
   const removeGhostText = useCallback(() => {
-    // Don't remove if we're currently inserting
-    if (isInsertingGhostTextRef.current) {
+    // Don't remove if we're currently inserting or if we're in the middle of streaming
+    if (isInsertingGhostTextRef.current || isLoading) {
       return;
     }
 
@@ -141,7 +143,7 @@ export function useAutoCompletion({
     }
 
     setShowGhostText(false);
-  }, [editorRef]);
+  }, [editorRef, isLoading]);
 
   const acceptCompletion = useCallback(() => {
     if (!ghostTextRef.current || !editorRef.current) return;
@@ -183,12 +185,21 @@ export function useAutoCompletion({
       }
       stop();
 
+      // Clear any existing completion
+      setCompletion("");
+
+      // Create the ghost text placeholder immediately
+      createGhostTextPlaceholder();
+      setShowGhostText(true);
+
       const context = content.slice(-contextLength);
 
       try {
         await complete(context);
       } catch (err) {
         console.error("Failed to complete:", err);
+        // Remove ghost text on error
+        removeGhostText();
       }
     },
     [
@@ -198,6 +209,8 @@ export function useAutoCompletion({
       removeGhostText,
       stop,
       showGhostText,
+      setCompletion,
+      createGhostTextPlaceholder,
     ]
   );
 
@@ -228,12 +241,34 @@ export function useAutoCompletion({
         return;
       }
 
-      // Any other key removes ghost text (but not during insertion)
+      // Only remove ghost text on actual typing keys (not navigation/modifier keys)
+      const isTypingKey =
+        e.key.length === 1 ||
+        e.key === "Backspace" ||
+        e.key === "Delete" ||
+        e.key === "Enter";
+
+      const isNavigationKey = [
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End",
+        "PageUp",
+        "PageDown",
+        "Shift",
+        "Control",
+        "Alt",
+        "Meta",
+      ].includes(e.key);
+
       if (
         showGhostText &&
+        isTypingKey &&
+        !isNavigationKey &&
         !e.metaKey &&
         !e.ctrlKey &&
-        e.key !== "Shift" &&
         !isInsertingGhostTextRef.current
       ) {
         removeGhostText();
@@ -250,18 +285,28 @@ export function useAutoCompletion({
     ]
   );
 
-  const handleInput = useCallback(() => {
-    // Don't remove ghost text if we're currently inserting it
-    if (isInsertingGhostTextRef.current) {
-      return;
-    }
+  const handleInput = useCallback(
+    (e: React.FormEvent<HTMLDivElement>) => {
+      // Don't remove ghost text if we're currently inserting it
+      if (isInsertingGhostTextRef.current) {
+        return;
+      }
 
-    // Remove ghost text on actual user input
-    if (showGhostText) {
-      removeGhostText();
-      stop();
-    }
-  }, [showGhostText, removeGhostText, stop]);
+      // Get the current content
+      const currentText = e.currentTarget.textContent || "";
+
+      // Check if the content actually changed (indicating real typing)
+      if (currentText !== currentContent && showGhostText) {
+        // Only remove ghost text if the content actually changed (user typed)
+        removeGhostText();
+        stop();
+      }
+
+      // Update our stored content
+      setCurrentContent(currentText);
+    },
+    [showGhostText, removeGhostText, stop, currentContent]
+  );
 
   // Cleanup on unmount
   useEffect(() => {

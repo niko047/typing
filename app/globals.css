@@ -186,15 +186,37 @@
   
   /* Ghost text styling for AI completions */
   .ghost-text {
-    opacity: 0.5;
+    /* Visual styling */
+    opacity: 0.6;
     color: var(--muted-foreground) !important;
+    font-style: italic;
+    
+    /* Interaction prevention */
     pointer-events: none;
     user-select: none;
-    background-color: rgba(128, 128, 128, 0.1) !important;
-    border-radius: 2px;
-    padding: 0 2px;
-    font-style: italic;
-    font-family: var(--font-eb-garamond), serif !important;
+    
+    /* Ensure no layout impact */
+    background-color: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    
+    /* Critical: inherit ALL font metrics to not affect caret */
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    
+    /* Ensure inline behavior */
+    display: inline !important;
+    vertical-align: baseline !important;
+    
+    /* Override any potential box model interference */
+    box-sizing: content-box !important;
+    height: auto !important;
+    width: auto !important;
   }
 
   /* Custom scrollbar styles */
