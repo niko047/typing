@@ -71,7 +71,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* Loading indicator - Find better way to display loading */}
             {isLoading && (
               <div className="fixed bottom-4 right-4 flex items-center gap-2">
                 <div className="animate-pulse text-muted-foreground text-sm">
@@ -81,8 +80,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* Instructions - I don't like the UI, change? */}
-          <div className="mt-8 text-xs text-muted-foreground">
+          <div className="mt-8 text-xs text-muted-foreground flex justify-between">
             <p>
               Press{" "}
               <kbd className="px-1 py-0.5 text-xs bg-muted rounded">Tab</kbd> to
