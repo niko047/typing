@@ -260,4 +260,17 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  /* Ensure blockquotes don't continue on Enter */
+  [contenteditable] blockquote {
+    display: block;
+  }
+  
+  /* Make sure we can edit markdown content naturally */
+  [contenteditable] h1,
+  [contenteditable] h2, 
+  [contenteditable] h3,
+  [contenteditable] blockquote {
+    outline: none;
+  }
 }
