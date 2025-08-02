@@ -152,4 +152,58 @@
   [contenteditable] ol {
     @apply list-decimal list-inside mb-4;
   }
+  
+  /* Ghost text styling for AI completions */
+  .ghost-text {
+    opacity: 0.5;
+    color: var(--muted-foreground) !important;
+    pointer-events: none;
+    user-select: none;
+    background-color: rgba(128, 128, 128, 0.1) !important;
+    border-radius: 2px;
+    padding: 0 2px;
+    font-style: italic;
+  }
+
+  /* Custom scrollbar styles */
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+    border: none;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+    opacity: 0.8;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+  }
+
+  /* Hide scrollbar on specific elements if needed */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
