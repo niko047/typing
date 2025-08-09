@@ -5,6 +5,7 @@ import { EditorToolbar } from "@/components/editor-toolbar";
 import { useAutoCompletion } from "@/hooks/useAutoCompletion";
 import { useLineMarkdown } from "@/hooks/useLineMarkdown";
 import { useSlashCommands } from "@/hooks/useSlashCommands";
+import { createLineElement } from "@/lib/lineMarkdown";
 import { SlashCommandPopover } from "@/components/slash-command-popover";
 
 export default function Home() {
@@ -53,23 +54,68 @@ export default function Home() {
     setCharCount(chars);
   }, [content]);
 
-  // Initialize editor with a paragraph
+  // Initialize editor with initial content
   useEffect(() => {
     if (editorRef.current && editorRef.current.children.length === 0) {
-      const p = document.createElement("p");
-      p.className = "mb-4";
-      p.contentEditable = "true";
-      p.style.outline = "none";
-      p.innerHTML = "<br>"; // Make it focusable
-      editorRef.current.appendChild(p);
+      // Create the initial structure
+      const initialContent = [
+        { text: "Hey there, I'm Niccolò", type: "heading1" as const },
+        {
+          text: "I'm currently working on Reweb, an AI-first design tool. I like building things and I'm particularly fascinated in AI implementations to solve problems.",
+          type: "paragraph" as const,
+        },
+        { text: "", type: "paragraph" as const },
+        {
+          text: "I'm really not based anywhere, I'm a nomad and I love traveling the world while I build stuff and live crazy adventures.",
+          type: "paragraph" as const,
+        },
+        { text: "", type: "paragraph" as const },
+        { text: "Why is this website so weird?", type: "heading3" as const },
+        {
+          text: "Well it's a bit weird, it's a writing tool I built for myself. I also like writing sometimes, so this helps me. If you want to try it, go to the end of this file and continue writing the story, then click Tab, it will generate some text given the context. Then if you want to accept it, Tab again, otherwise don't.",
+          type: "paragraph" as const,
+        },
+        {
+          text: "If you want to reach out, @niccolodiana on X, or similar on other socials.",
+          type: "quote" as const,
+        },
+        { text: "", type: "paragraph" as const },
+        { text: "A short story about time", type: "heading3" as const },
+        {
+          text: "Traveling through the twists and turns of history seemed like the perfect adventure. I found myself leaping from ancient civilisations to futuristic worlds, each setting bursting with characters and tales waiting to be told. As I navigated through the vibrant tapestry of time, I encountered warriors, inventors, and dreamers, each with their own aspirations and challenges. With every leap, my understanding of humanity deepened, knitting together the threads of stories that linked us all across eras.",
+          type: "paragraph" as const,
+        },
+        { text: "", type: "paragraph" as const },
+        {
+          text: "Amidst the chaos and beauty, I discovered that every moment held a lesson, a fleeting glimpse into the souls that shaped our world. It was as if the echoes of their voices guided me, urging me to not only witness but also share their legacies with others.",
+          type: "paragraph" as const,
+        },
+        { text: "", type: "paragraph" as const },
+      ];
 
-      // Focus the paragraph
-      const range = document.createRange();
-      const selection = window.getSelection();
-      range.selectNodeContents(p);
-      range.collapse(true);
-      selection?.removeAllRanges();
-      selection?.addRange(range);
+      // Create and append each element
+      initialContent.forEach((item) => {
+        const element = createLineElement(item.text, item.type);
+        editorRef.current!.appendChild(element);
+      });
+
+      // Set initial content for word count
+      const initialText = initialContent
+        .map((item) => item.text)
+        .filter((text) => text)
+        .join(" ");
+      setContent(initialText);
+
+      // Focus the last paragraph
+      const lastParagraph = editorRef.current.lastElementChild;
+      if (lastParagraph && lastParagraph.tagName === "P") {
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(lastParagraph);
+        range.collapse(true);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
     }
   }, []);
 
